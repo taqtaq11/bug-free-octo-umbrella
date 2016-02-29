@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="215028466">
+    <data-source source="LOCAL" name="PostgreSQL - octobase@hiterminal.cf" uuid="90d72eac-53ad-42d6-bac4-03e8bcff72ba">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://hiterminal.cf:5432/octobase</jdbc-url>
+    </data-source>
+  </component>
+</project>
