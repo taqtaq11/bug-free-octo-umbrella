@@ -3,13 +3,13 @@ package models;
 /**
  * Created by Alexander on 21/03/16.
  */
-public class SessionData {
+public class Session {
     private long userId;
     private String token;
 
-    public SessionData() {}
+    public Session() {}
 
-    public SessionData(long userId, String token) {
+    public Session(long userId, String token) {
         this.userId = userId;
         this.token = token;
     }

@@ -1,11 +1,12 @@
 package services;
 
+import models.Session;
 import models.User;
-import models.UserShort;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.sql.*;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,6 +20,9 @@ public class UserService {
 
     @Inject
     HashService hashService;
+
+    @Inject
+    SessionService sessionService;
 
     public void create(String login, String password, String name) throws SQLException {
         Connection connection = connectionService.getConnection();
@@ -35,16 +39,19 @@ public class UserService {
         connection.close();
     }
 
-    public UserShort readShort(long id) throws SQLException {
+    public User read(long id) throws Exception {
         Connection connection = connectionService.getConnection();
 
-        PreparedStatement ps = connection.prepareStatement("SELECT * FROM public.user WHERE id = ?",
-                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        // General info
+        PreparedStatement ps = connection.prepareStatement("SELECT * FROM public.user WHERE id = ?");
         ps.setLong(1, id);
         ResultSet rs = ps.executeQuery();
-        rs.next();
 
-        UserShort userShort = new UserShort(
+        if (!rs.next()) {
+            throw new Exception("User doen't exist.");
+        }
+
+        User user = new User(
                 rs.getLong("id"),
                 rs.getString("login"),
                 rs.getString("password"),
@@ -52,41 +59,124 @@ public class UserService {
                 rs.getString("avatar_file")
                 );
 
-        ps = connection.prepareStatement("SELECT * FROM public.follower WHERE follower_id = ?",
-                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        rs.close();
+        ps.close();
+
+        // Meshes
+        ps = connection.prepareStatement("SELECT * FROM public.mesh WHERE author = ?");
         ps.setLong(1, id);
         rs = ps.executeQuery();
-        rs.last();
-        userShort.setSubscriptionsCount(rs.getRow());
 
-        ps = connection.prepareStatement("SELECT * FROM public.follower WHERE user_id = ?",
-                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        while (rs.next()) {
+            user.getMeshes().add(rs.getLong("id"));
+        }
+
+        rs.close();
+        ps.close();
+
+        // Subscriptions
+        ps = connection.prepareStatement("SELECT * FROM public.follower WHERE follower_id = ?");
         ps.setLong(1, id);
         rs = ps.executeQuery();
-        rs.last();
-        userShort.setFollowersCount(rs.getRow());
 
-        ps = connection.prepareStatement("SELECT * FROM public.mesh WHERE author = ?",
-                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        while (rs.next()) {
+            user.getSubscriptions().add(rs.getLong("user_id"));
+        }
+
+        rs.close();
+        ps.close();
+
+        // Followers
+        ps = connection.prepareStatement("SELECT * FROM public.follower WHERE user_id = ?");
         ps.setLong(1, id);
         rs = ps.executeQuery();
-        rs.last();
-        userShort.setMeshesCount(rs.getRow());
 
-        ps = connection.prepareStatement("SELECT * FROM public.like WHERE user_id = ?",
-                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        while (rs.next()) {
+            user.getFollowers().add(rs.getLong("follower_id"));
+        }
+
+        rs.close();
+        ps.close();
+
+        // Likes
+        ps = connection.prepareStatement("SELECT * FROM public.like WHERE user_id = ?");
         ps.setLong(1, id);
         rs = ps.executeQuery();
-        rs.last();
-        userShort.setLikesCount(rs.getRow());
 
-        return userShort;
+        while (rs.next()) {
+            user.getLikes().add(rs.getLong("mesh_id"));
+        }
+
+        rs.close();
+        ps.close();
+
+        // Comments
+        ps = connection.prepareStatement("SELECT * FROM public.comment WHERE user_id = ?");
+        ps.setLong(1, id);
+        rs = ps.executeQuery();
+
+        while (rs.next()) {
+            user.getComments().add(rs.getLong("id"));
+        }
+
+        rs.close();
+        ps.close();
+        connection.close();
+
+        return user;
     }
 
-// TODO: 20/03/16 implement
-//    public User read(long id) {}
+    // TODO: 06/05/16 realize
 //    public void update(String token, long id, String newName, String oldPass, String newPass, String newAvatarFile) {}
-//    public List<User> search(String query) {}
-//    public void follow(String token, long id, long toFollowId) {}
-//    public void unfollow(String token, long id, long toUnfollowId) {}
+
+    public List<User> search(String query) throws Exception {
+        List<User> users = new LinkedList<>();
+
+        Connection connection = connectionService.getConnection();
+        PreparedStatement ps = connection.prepareStatement("SELECT * FROM public.user");
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            users.add(read(rs.getLong("id")));
+        }
+
+        rs.close();
+        ps.close();
+
+        return users;
+    }
+
+    public void follow(String token, String ip, long id, long toFollowId) throws Exception {
+        long userId = sessionService.check(token, ip);
+
+        if (userId != id) {
+            throw new Exception("You can only follow using your id.");
+        }
+
+        Connection connection = connectionService.getConnection();
+        PreparedStatement ps =
+                connection.prepareStatement("INSERT INTO public.follower(follower_id, user_id) VALUES (?, ?)");
+        ps.setLong(1, userId);
+        ps.setLong(2, toFollowId);
+        ps.execute();
+        ps.close();
+        connection.close();
+    }
+
+    public void unfollow(String token, String ip, long id, long toUnfollowId) throws Exception {
+        long userId = sessionService.check(token, ip);
+
+        if (userId != id) {
+            throw new Exception("You can only unfollow using your id.");
+        }
+
+        Connection connection = connectionService.getConnection();
+        PreparedStatement ps =
+                connection.prepareStatement("DELETE FROM public.follower WHERE follower_id = ? AND user_id = ?");
+        ps.setLong(1, userId);
+        ps.setLong(2, toUnfollowId);
+        ps.execute();
+        ps.close();
+        connection.close();
+    }
 }
