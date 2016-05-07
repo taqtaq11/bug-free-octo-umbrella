@@ -5,10 +5,9 @@ import models.User;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.resource.spi.ConnectionDefinition;
+import java.sql.*;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -86,7 +85,7 @@ public class MeshService {
         ps.close();
 
         // Comments
-        ps = connection.prepareStatement("SELECT * FROM public.comment WHERE mesh_id = ?");
+        ps = connection.prepareStatement("SELECT * FROM public.comment WHERE mesh_id = ? ORDER BY timestamp");
         ps.setLong(1, id);
         rs = ps.executeQuery();
 
@@ -101,10 +100,90 @@ public class MeshService {
         return mesh;
     }
 
+    // TODO: 07/05/16 realize
 //    public void update(String token, long id, String newName, String newDescription) {}
-//    public void delete(String token, long id) {}
-//    public List<Mesh> search(String query) {}
-//    public void like(String token, long meshId, long userId) {}
-//    public void unlike(String token, long meshId, long userId) {}
-//    public void comment(String token, long meshId, String message) {}
+
+    public void delete(String token, String ip, long id) throws Exception {
+        long userId = sessionService.check(token, ip);
+        Mesh mesh = read(id);
+
+        if (mesh.getAuthor() != userId) {
+            throw new Exception("You can not delete not your mesh.");
+        }
+
+        Connection connection = connectionService.getConnection();
+        PreparedStatement ps = connection.prepareStatement("DELETE FROM public.mesh WHERE id = ?");
+        ps.setLong(1, id);
+        ps.execute();
+        ps.close();
+        connection.close();
+    }
+
+    public List<Mesh> search(String query) throws Exception {
+        List<Mesh> meshes = new LinkedList<>();
+
+        Connection connection = connectionService.getConnection();
+        PreparedStatement ps = connection.prepareStatement("SELECT * FROM public.mesh");
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            meshes.add(read(rs.getLong("id")));
+        }
+
+        rs.close();
+        ps.close();
+        connection.close();
+
+        return meshes;
+    }
+
+    public void like(String token, String ip, long meshId, long passedUserId) throws Exception {
+        long userId = sessionService.check(token, ip);
+
+        if (userId != passedUserId) {
+            throw new Exception("You can like only using your id.");
+        }
+
+        Connection connection = connectionService.getConnection();
+        PreparedStatement ps = connection.prepareStatement("INSERT INTO public.like(mesh_id, user_id) VALUES (?, ?)");
+        ps.setLong(1, meshId);
+        ps.setLong(2, userId);
+        ps.execute();
+
+        ps.close();
+        connection.close();
+    }
+
+    public void unlike(String token, String ip, long meshId, long passedUserId) throws Exception {
+        long userId = sessionService.check(token, ip);
+
+        if (userId != passedUserId) {
+            throw new Exception("You can unlike only using your id.");
+        }
+
+        Connection connection = connectionService.getConnection();
+        PreparedStatement ps = connection.prepareStatement("DELETE FROM public.like WHERE mesh_id = ? and user_id = ?");
+        ps.setLong(1, meshId);
+        ps.setLong(2, userId);
+        ps.execute();
+
+        ps.close();
+        connection.close();
+    }
+
+    public void comment(String token, String ip, long meshId, String message) throws Exception {
+        long userId = sessionService.check(token, ip);
+
+        Connection connection = connectionService.getConnection();
+        PreparedStatement ps =connection
+                .prepareStatement("INSERT INTO public.comment(user_id, mesh_id, message, timestamp) VALUES (?, ?, ?, ?)");
+        ps.setLong(1, userId);
+        ps.setLong(2, meshId);
+        ps.setString(3, message);
+        ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+        ps.execute();
+
+        ps.close();
+        connection.close();
+    }
 }

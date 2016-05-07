@@ -38,8 +38,12 @@ public class SessionService {
             throw new Exception("Bad credentials.");
         }
 
-        // Create session
         long userId = rs.getLong("id");
+
+        rs.close();
+        ps.close();
+
+        // Create session
         String token = hashService.hash("" + new Random().nextLong());
 
         ps = connection.prepareStatement("INSERT INTO public.session (user_id, ip, token, last_access) VALUES (?, ?, ?, ?)");
@@ -62,6 +66,9 @@ public class SessionService {
         ps.setString(1, token);
         ps.setString(2, ip);
         ps.execute();
+
+        ps.close();
+        connection.close();
     }
 
     public long check(String token, String ip) throws Exception {
@@ -96,7 +103,9 @@ public class SessionService {
         ps.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
         ps.setLong(2, sessionId);
         ps.execute();
+
         ps.close();
+        connection.close();
 
         return userId;
     }

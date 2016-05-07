@@ -142,6 +142,7 @@ public class UserService {
 
         rs.close();
         ps.close();
+        connection.close();
 
         return users;
     }
@@ -158,6 +159,7 @@ public class UserService {
                 connection.prepareStatement("INSERT INTO public.follower(follower_id, user_id) VALUES (?, ?)");
         ps.setLong(1, userId);
         ps.setLong(2, toFollowId);
+
         ps.execute();
         ps.close();
         connection.close();
@@ -176,6 +178,7 @@ public class UserService {
         ps.setLong(1, userId);
         ps.setLong(2, toUnfollowId);
         ps.execute();
+
         ps.close();
         connection.close();
     }
