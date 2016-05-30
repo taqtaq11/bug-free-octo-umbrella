@@ -1,0 +1,28 @@
+<div class="registration-form-wrapper" ng-controller="registrationCtrl" layout="column" layout-align="center center" ng-cloak>
+    <md-content layout-padding>
+        <form name="registrationForm" ng-submit="submit(credentials)" novalidate>
+            <md-input-container class="md-block">
+                <label>Логин</label>
+                <input required md-no-asterisk name="login" ng-model="credentials.login">
+                <div ng-messages="registrationForm.login.$error">
+                    <div ng-message="required">Введите логин</div>
+                </div>
+            </md-input-container>
+            <md-input-container class="md-block">
+                <label>Пароль</label>
+                <input type="password" required md-no-asterisk name="password" ng-model="credentials.password">
+                <div ng-messages="registrationForm.password.$error">
+                    <div ng-message="required">Введите пароль</div>
+                </div>
+            </md-input-container>
+            <md-input-container class="md-block">
+                <label>Имя и фамилия</label>
+                <input type="name" required name="name" ng-model="credentials.name">
+                <div ng-messages="registrationForm.password.$error">
+                    <div ng-message="required">Введите имя и фамилию</div>
+                </div>
+            </md-input-container>
+            <md-button type="submit" class="md-raised md-primary">Зарегистрироваться</md-button>
+        </form>
+    </md-content>
+</div>

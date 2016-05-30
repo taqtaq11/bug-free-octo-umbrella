@@ -1,0 +1,81 @@
+<md-content>
+    <div class="mesh-wrapper">
+        <md-card>
+            <md-card-header>
+                <md-card-avatar>
+                    <img class="md-user-avatar"
+                         ng-src="{{DEFAULTS.images.imagesDirectory + '/' + user.avatarFile}}"
+                         on-error-src="{{DEFAULTS.images.defaultAvatarPath}}" />
+                </md-card-avatar>
+                <md-card-header-text>
+                    <span class="md-title">{{user.login}}</span>
+                    <span ng-if="user.name.length" class="md-subhead">{{user.name}}</span>
+                </md-card-header-text>
+            </md-card-header>
+            <div class="render-wrapper">
+                <div class="renderer-stub"></div>
+            </div>
+            <md-card-title>
+                <md-card-title-text>
+                    <span class="md-headline">{{mesh.name}}</span>
+                </md-card-title-text>
+            </md-card-title>
+            <md-card-content>
+                <div class="description">
+                    {{mesh.description}}
+                </div>
+            </md-card-content>
+        </md-card>
+    </div>
+
+    <br>
+
+    <!--Комментарии-->
+    <div class="comments-wrapper">
+        <md-subheader class="md-primary md-whiteframe-2dp">
+            <h3>Комментарии</h3>
+        </md-subheader>
+        <md-card ng-repeat="comment in comments">
+            <md-card-header>
+                <md-card-avatar>
+                    <img class="md-user-avatar"
+                         ng-src="{{DEFAULTS.images.imagesDirectory + '/' + user.avatarFile}}"
+                         on-error-src="{{DEFAULTS.images.defaultAvatarPath}}" />
+                </md-card-avatar>
+                <md-card-header-text>
+                    <span class="md-title">{{comment.user.login}}</span>
+                    <span ng-if="comment.user.name.length" class="md-subhead">{{comment.user.name}}</span>
+                </md-card-header-text>
+            </md-card-header>
+            <md-card-content>
+                {{comment.message}}
+            </md-card-content>
+        </md-card>
+
+        <!--Новый комментарий-->
+        <div class="add-comment-wrapper" layout="column" ng-if="isAuthorized">
+            <md-card>
+                <md-card-header>
+                    <md-card-avatar>
+                        <img class="md-user-avatar"
+                             ng-src="{{DEFAULTS.images.imagesDirectory + '/' + currentUser.avatarFile}}"
+                             on-error-src="{{DEFAULTS.images.defaultAvatarPath}}" />
+                    </md-card-avatar>
+                    <md-card-header-text>
+                        <span class="md-title">{{currentUser.login}}</span>
+                        <span ng-if="currentUser.name.length" class="md-subhead">{{currentUser.name}}</span>
+                    </md-card-header-text>
+                </md-card-header>
+                <md-card-content>
+                    <form name="addCommentForm" ng-submit="addCommentToMesh(newComment)" novalidate>
+                        <md-input-container class="md-block">
+                            <label>Оставить комментарий</label>
+                            <textarea ng-model="newComment" md-maxlength="150" rows="5" md-select-on-focus></textarea>
+                        </md-input-container>
+                        <md-button type="submit" class="md-raised md-primary">Отправить</md-button>
+                    </form>
+                </md-card-content>
+            </md-card>
+        </div>
+    </div>
+</md-content>

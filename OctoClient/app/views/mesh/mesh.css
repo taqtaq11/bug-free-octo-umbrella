@@ -1,0 +1,22 @@
+.mesh-wrapper {
+    margin: 0 auto;
+    width: 50%;
+}
+
+.comments-wrapper {
+    margin: 0 auto;
+    width: 45%;
+}
+
+/*Stub for renderer*/
+.renderer-stub {
+    margin: 0 auto;
+    width: 80%;
+    background-color: yellow;
+    height: 50vh;
+}
+
+.add-comment-wrapper form md-input-container {
+    margin: 0 auto;
+    width: 80%;
+}

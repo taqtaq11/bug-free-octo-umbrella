@@ -1,0 +1,34 @@
+.mesh-tiles-wrapper {
+    width: 100%;
+}
+
+.mesh-tiles-wrapper md-content {
+    margin: 0 auto;
+    background-color: #E0F2F1;
+}
+
+.mesh-tiles-wrapper md-content md-grid-list {
+    background-color: #E0F2F1;
+}
+
+.mesh-tiles-wrapper md-content .mesh-tile {
+    cursor: pointer;
+    background-color: #A7FFEB;
+}
+
+.mesh-tiles-wrapper md-content .mesh-tile md-grid-tile-header {
+    padding: 10px;
+    background-color: #009688;
+}
+
+.mesh-tiles-wrapper md-content .mesh-tile md-grid-tile-footer {
+    padding: 10px;
+    background-color: #009688;
+}
+
+.material-icons {
+    fill: currentColor;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 1;
+}

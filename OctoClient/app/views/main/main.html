@@ -1,0 +1,21 @@
+<div class="mesh-tiles-wrapper" ng-controller="mainCtrl">
+    <md-content layout-padding>
+        <md-progress-circular ng-hide="meshes.length" md-mode="indeterminate"></md-progress-circular>
+        <md-grid-list ng-show="meshes.length" md-cols="4" md-row-height="3:4" md-gutter="20px" ng-cloak>
+            <md-grid-tile class="mesh-tile md-whiteframe-2dp" md-colspan="1"
+                          ng-repeat="mesh in meshes" ng-click="openMeshView(mesh.id)">
+                <md-grid-tile-header>
+                    <div class="mesh-name">{{mesh.name}}</div>
+                </md-grid-tile-header>
+                <img src="{{DEFAULTS.images.defaultImagePath}}" alt="No image" width="50%">
+                <md-grid-tile-footer>
+                    <div layout="row">
+                        <div class="likes"><i class="material-icons">favorite</i> {{mesh.likes.length}}</div>
+                        <div class="comments-count"><i class="material-icons">message</i> {{mesh.comments.length}}</div>
+                    </div>
+                </md-grid-tile-footer>
+            </md-grid-tile>
+        </md-grid-list>
+    </md-content>
+    </div>
+</div>
